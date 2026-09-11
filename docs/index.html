@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b1017" />
+    <meta
+      name="description"
+      content="PinShot 是一款面向 Windows 的隐私优先截图工具，支持截图标注、滚动截图、OCR、置顶和录屏。"
+    />
+    <meta property="og:title" content="PinShot — 隐私优先的 Windows 截图工具" />
+    <meta
+      property="og:description"
+      content="截图、标注、滚动截图、OCR 与录屏，一次完成。"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="assets/capture-overlay.png" />
+    <title>PinShot — 隐私优先的 Windows 截图工具</title>
+    <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳到主要内容</a>
+
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="PinShot 首页">
+        <img src="assets/icon.svg" alt="" width="36" height="36" />
+        <span>PinShot</span>
+      </a>
+      <nav aria-label="主要导航">
+        <a href="#features">功能</a>
+        <a href="#privacy">隐私</a>
+        <a href="https://github.com/son-soft/pin-shot">GitHub</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top">
+        <div class="hero-copy">
+          <div class="eyebrow"><span></span> Windows 截图工具</div>
+          <h1>灵感出现时，<br /><em>一键截住。</em></h1>
+          <p class="hero-description">
+            截图、标注、滚动截图、本地 OCR 与录屏，一次完成。轻巧、快速，屏幕内容留在你的电脑里。
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="https://github.com/son-soft/pin-shot/releases">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 5-5m-5 5-5-5M5 21h14" /></svg>
+              获取 PinShot
+            </a>
+            <a class="button button-secondary" href="https://github.com/son-soft/pin-shot">
+              查看源码
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+            </a>
+          </div>
+          <div class="meta-row" aria-label="项目特性">
+            <span>Windows</span><i></i><span>本地优先</span><i></i><span>Apache-2.0</span>
+          </div>
+        </div>
+
+        <div class="hero-visual" aria-label="PinShot 截图界面预览">
+          <div class="glow"></div>
+          <div class="window">
+            <div class="window-bar">
+              <span class="window-title"><img src="assets/icon.svg" alt="" /> PinShot</span>
+              <span class="window-controls" aria-hidden="true">—　□　×</span>
+            </div>
+            <img src="assets/capture-overlay.png" alt="PinShot 截图选区和标注工具栏" />
+          </div>
+          <div class="shortcut-card">
+            <span>默认快捷键</span>
+            <strong><kbd>Alt</kbd><b>+</b><kbd>F2</kbd></strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="features">
+        <div class="section-heading">
+          <span>够快，也够完整</span>
+          <h2>从截图到分享，不打断思路</h2>
+          <p>常用能力都在截图选区旁，需要时触手可及，不需要时安静隐身。</p>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature-card feature-wide">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3m13-5h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3m13 5h3a2 2 0 0 0 2-2v-3M8 8h8v8H8z" /></svg>
+            </div>
+            <div>
+              <h3>截图与标注</h3>
+              <p>快速选择区域，立即添加箭头、文字、马赛克与图形，然后复制或保存。</p>
+            </div>
+            <div class="mini-toolbar" aria-hidden="true">
+              <span>↗</span><span>A</span><span>▦</span><span>▭</span><span>⌁</span>
+            </div>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v18H7zM4 7l3-3 3 3m4 10 3 3 3-3" /></svg>
+            </div>
+            <h3>滚动截图</h3>
+            <p>自动拼接长页面，完整保存超出屏幕的内容。</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5V3h4v2m8 0V3h4v2M4 19v2h4v-2m8 0v2h4v-2M7 9h10M7 13h7M7 17h10" /></svg>
+            </div>
+            <h3>本地 OCR</h3>
+            <p>从图片中提取文字，识别过程在本机完成。</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" /><circle cx="12" cy="12" r="3" /></svg>
+            </div>
+            <h3>屏幕录制</h3>
+            <p>录制选定区域，并导出 WebM 或 MP4 文件。</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.4 5 5.6.8-4 3.9.9 5.6-4.9-2.7-4.9 2.7.9-5.6-4-3.9 5.6-.8z" /></svg>
+            </div>
+            <h3>贴图与历史</h3>
+            <p>将截图置顶参考，随时找回最近三张截图。</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="privacy-section" id="privacy">
+        <div class="privacy-orbit" aria-hidden="true">
+          <span class="orbit orbit-one"></span>
+          <span class="orbit orbit-two"></span>
+          <div class="shield">
+            <svg viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.8 2.8 8 7 10 4.2-2 7-5.2 7-10V6z" /><path d="m9 12 2 2 4-4" /></svg>
+          </div>
+        </div>
+        <div class="privacy-copy">
+          <span>隐私优先</span>
+          <h2>你的屏幕，只属于你</h2>
+          <p>
+            PinShot 的截图、历史和 OCR 设计为在本机处理。截图功能不会自动上传屏幕内容，也不依赖云端识别服务。
+          </p>
+          <ul>
+            <li><span>✓</span> OCR 在本机运行</li>
+            <li><span>✓</span> 截图历史保存在本地</li>
+            <li><span>✓</span> 源代码公开可检查</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="cta">
+        <div>
+          <span>准备好了吗？</span>
+          <h2>让每次截图都简单一点</h2>
+          <p>免费下载，开源透明。适用于 Windows。</p>
+        </div>
+        <a class="button button-light" href="https://github.com/son-soft/pin-shot/releases">前往下载</a>
+      </section>
+    </main>
+
+    <footer>
+      <a class="brand" href="#top"><img src="assets/icon.svg" alt="" /> <span>PinShot</span></a>
+      <p>隐私优先的 Windows 截图工具</p>
+      <div>
+        <a href="https://github.com/son-soft/pin-shot">GitHub</a>
+        <a href="https://github.com/son-soft/pin-shot/blob/master/LICENSE">Apache-2.0</a>
+      </div>
+    </footer>
+  </body>
+</html>
