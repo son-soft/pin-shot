@@ -7,11 +7,6 @@ PinShot 是一款面向 Windows 的隐私优先截图工具。它支持快速截
 
 ![PinShot 截图选区主窗口](frontend/public/capture-overlay.png)
 
-设置界面：
-
-![PinShot 设置界面](frontend/public/main-window.png)
-
-
 ## 功能
 
 - 全局快捷键唤起截图选区
