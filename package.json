@@ -1,0 +1,32 @@
+{
+  "name": "pin-shot",
+  "version": "1.0.3",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --config frontend/vite.config.ts",
+    "build": "tsc -b frontend/tsconfig.json && vite build --config frontend/vite.config.ts",
+    "preview": "vite preview --config frontend/vite.config.ts",
+    "test": "vitest run --config frontend/vitest.config.ts",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@douyinfe/semi-icons": "^2.103.0",
+    "@douyinfe/semi-ui": "^2.103.0",
+    "@tauri-apps/api": "^2.11.1",
+    "mp4-muxer": "^5.2.2",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "webm-muxer": "^5.1.4"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.11.4",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.1.0",
+    "jsdom": "^26.1.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.2",
+    "vitest": "^4.0.0"
+  }
+}

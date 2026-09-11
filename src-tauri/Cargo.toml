@@ -1,0 +1,38 @@
+[package]
+name = "pin-shot"
+version = "1.0.3"
+description = "A privacy-first Windows screenshot utility"
+authors = ["PinShot"]
+edition = "2021"
+rust-version = "1.77.2"
+build = "build.rs"
+
+[lib]
+name = "pin_shot_lib"
+crate-type = ["lib"]
+
+[build-dependencies]
+tauri-build = { version = "2.6.3", features = [] }
+
+[dependencies]
+tauri = { version = "2.11.5", features = ["tray-icon"] }
+tauri-plugin-dialog = "2.7.3"
+tauri-plugin-global-shortcut = "2.3.2"
+tauri-plugin-single-instance = "2.4.4"
+image = { version = "0.25", default-features = false, features = ["png", "gif"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+windows = { version = "0.61.3", features = [
+  "Win32_Foundation",
+  "Win32_Graphics_Gdi",
+  "Win32_Graphics_Dwm",
+  "Win32_UI_WindowsAndMessaging",
+  "Win32_UI_Input_KeyboardAndMouse",
+  "Win32_System_DataExchange",
+  "Win32_System_Memory",
+  "Win32_System_Ole",
+  "Win32_System_Registry",
+  "Win32_System_Threading"
+] }
+kreuzberg-paddle-ocr = "5.0.0-rc.35"
+ort = { version = "2.0.0-rc.12", features = ["download-binaries", "copy-dylibs"] }

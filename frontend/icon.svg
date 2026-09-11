@@ -1,0 +1,19 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="pinshot-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f2aa" />
+      <stop offset="35%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+  </defs>
+
+  <!-- Full-bleed squircle background -->
+  <rect x="0" y="0" width="512" height="512" rx="116" fill="url(#pinshot-bg)" />
+
+  <!-- Ultra-clean, minimalist solid camera silhouette with comfortable breathing margins -->
+  <path
+    fill="#ffffff"
+    fill-rule="evenodd"
+    d="M 218,144 C 218,134 226,126 236,126 L 276,126 C 286,126 294,134 294,144 L 308,162 L 378,162 C 398,162 414,178 414,198 L 414,352 C 414,372 398,388 378,388 L 134,388 C 114,388 98,372 98,352 L 98,198 C 98,178 114,162 134,162 L 204,162 Z M 256,224 A 52,52 0 1,0 256,328 A 52,52 0 1,0 256,224 Z"
+  />
+</svg>
