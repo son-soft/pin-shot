@@ -2,10 +2,13 @@
   "name": "pin-shot",
   "version": "1.0.3",
   "private": true,
+  "license": "Apache-2.0",
   "type": "module",
   "scripts": {
     "dev": "vite --config frontend/vite.config.ts",
-    "build": "tsc -b frontend/tsconfig.json && vite build --config frontend/vite.config.ts",
+    "build": "node scripts/check-licenses.mjs && tsc -b frontend/tsconfig.json && vite build --config frontend/vite.config.ts",
+    "licenses:generate": "node scripts/license-inventory.mjs --write",
+    "licenses:check": "node scripts/check-licenses.mjs",
     "preview": "vite preview --config frontend/vite.config.ts",
     "test": "vitest run --config frontend/vitest.config.ts",
     "tauri": "tauri"

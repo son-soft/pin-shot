@@ -1,0 +1,7 @@
+{
+  "Cargo.lock": "13d39a697da31337f53ccbe8e252c64a023eadf2d796e06094522ab72e94d616",
+  "pnpm-lock.yaml": "ad9cbc8ad7f4d88fd0c5ad1e56efed12a9e133aa60b5a2ec543542942922fcc5",
+  "src-tauri/Cargo.toml": "141cc691154e738b8b2f47165b26e452816066c89a95df8e8007c2336d2faad0",
+  "package.json": "ef9faacb0b3858ebefa39c4f0f3d97b60b074883ff35b3d28ba6d4f3041b57ed",
+  "scripts/license-inventory.mjs": "df5ccfe82da9a3f4c879d911d2fe1e8cad6380be39aba460ee844b845934a244"
+}

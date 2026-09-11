@@ -71,8 +71,11 @@
       "icons/icon.ico",
       "../icon.ico"
     ],
-    "resources": [
-      "resources/models/*"
-    ]
+    "resources": {
+      "resources/models/": "resources/models/",
+      "../LICENSE": "LICENSE",
+      "../THIRD_PARTY_NOTICES.md": "THIRD_PARTY_NOTICES.md",
+      "../licenses/": "licenses/"
+    }
   }
 }

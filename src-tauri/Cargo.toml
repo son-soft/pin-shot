@@ -2,6 +2,7 @@
 name = "pin-shot"
 version = "1.0.3"
 description = "A privacy-first Windows screenshot utility"
+license = "Apache-2.0"
 authors = ["PinShot"]
 edition = "2021"
 rust-version = "1.77.2"

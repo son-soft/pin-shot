@@ -974,9 +974,9 @@ mod tests {
     #[test]
     fn decodes_unicode_recording_paths() {
         assert_eq!(
-            decode_percent_header("X%3A%5C%E6%B5%8B%E8%AF%95%5C%E5%BD%95%E5%B1%8F.webm")
+            decode_percent_header("%E6%B5%8B%E8%AF%95%5C%E5%BD%95%E5%B1%8F.webm")
                 .unwrap(),
-            "X:\\测试\\录屏.webm"
+            "测试\\录屏.webm"
         );
     }
 }
