@@ -147,10 +147,9 @@ impl OcrService {
             .map_err(|e| format!("OCR 识别执行失败: {:?}", e))?;
 
         let mut lines = Vec::new();
-        let mut full_text_parts = Vec::new();
 
         for block in ocr_result.text_blocks {
-            let text = block.text.trim().to_string();
+            let text = clean_recognized_text(&block.text);
             if text.is_empty() {
                 continue;
             }
@@ -180,7 +179,6 @@ impl OcrService {
                 [0, 0, 0, 0]
             };
 
-            full_text_parts.push(text.clone());
             lines.push(OcrLineResult {
                 text,
                 score: block.text_score,
@@ -189,9 +187,17 @@ impl OcrService {
             });
         }
 
-        let full_text = full_text_parts.join("\n");
+        let full_text = lines.iter().map(|line| line.text.as_str()).collect::<Vec<_>>().join("\n");
         Ok(OcrResponse { full_text, lines })
     }
+}
+
+// The OCR dependency splits dictionary entries on LF without stripping CR.
+// A CRLF dictionary therefore adds a carriage return to every decoded token.
+// Detection already separates lines into blocks, so CR is never a line break
+// we should preserve inside a recognized block. Clean before both UI and copy.
+fn clean_recognized_text(text: &str) -> String {
+    text.replace('\r', "").trim().to_string()
 }
 
 fn num_cpus() -> usize {
@@ -243,6 +249,23 @@ fn find_model_dir(app: Option<&AppHandle>) -> Option<PathBuf> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn crlf_dictionary_does_not_insert_carriage_returns_between_characters() {
+        // Reproduce the dependency's dictionary decoding with both line endings.
+        for dictionary in ["#\n目\n前\n还\n不\n能\n确\n认\n ", "#\r\n目\r\n前\r\n还\r\n不\r\n能\r\n确\r\n认\r\n "] {
+            let keys: Vec<_> = dictionary.split('\n').collect();
+            let decoded = keys[1..8].concat();
+            assert_eq!(clean_recognized_text(&decoded), "目前还不能确认");
+        }
+    }
+
+    #[test]
+    fn cleaning_preserves_spaces_and_normal_text() {
+        assert_eq!(clean_recognized_text("Hello world"), "Hello world");
+        assert_eq!(clean_recognized_text("中\r文\r \rOCR\r"), "中文 OCR");
+        assert_eq!(clean_recognized_text(" \r"), "");
+    }
 
     #[test]
     fn test_ocr_service_initialization() {
