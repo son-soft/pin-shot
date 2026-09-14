@@ -2932,7 +2932,7 @@ checksum = "a89322df9ebe1c1578d689c92318e070967d1042b512afbe49518723f4e6d5cd"
 
 [[package]]
 name = "pin-shot"
-version = "1.0.3"
+version = "8.8.9"
 dependencies = [
  "image",
  "kreuzberg-paddle-ocr",

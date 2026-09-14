@@ -1,6 +1,6 @@
 [package]
 name = "pin-shot"
-version = "1.0.3"
+version = "8.8.9"
 description = "A privacy-first Windows screenshot utility"
 license = "Apache-2.0"
 authors = ["PinShot"]
