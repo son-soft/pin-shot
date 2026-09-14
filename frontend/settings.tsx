@@ -16,6 +16,7 @@ import {
 } from '@douyinfe/semi-icons';
 import { IconPin } from './icons';
 import { Button, Divider, Select, Spin, Switch, Tag, Tooltip } from '@douyinfe/semi-ui';
+import { getVersion } from '@tauri-apps/api/app';
 import { listen } from '@tauri-apps/api/event';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -53,9 +54,14 @@ export function Settings() {
   const [error, setError] = useState<string | null>(null);
   const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
   const [openingHistory, setOpeningHistory] = useState(false);
+  const [appVersion, setAppVersion] = useState<string | null>(null);
   const openingHistoryRef = useRef(false);
 
   useEffect(() => {
+    getVersion()
+      .then(setAppVersion)
+      .catch(() => setAppVersion('未知'));
+
     getSettings()
       .then(value => {
         setSettings(value);
@@ -174,7 +180,7 @@ export function Settings() {
           <div className="ps-title-wrapper">
             <div className="ps-title-row">
               <span className="ps-app-title">PinShot 设置</span>
-              <span className="ps-version-pill">v{__APP_VERSION__}</span>
+              <span className="ps-version-pill">v{appVersion ?? '...'}</span>
             </div>
             <p className="ps-app-subtitle">让截图更顺手</p>
           </div>
