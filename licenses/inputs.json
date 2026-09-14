@@ -1,7 +1,7 @@
 {
-  "Cargo.lock": "13d39a697da31337f53ccbe8e252c64a023eadf2d796e06094522ab72e94d616",
+  "Cargo.lock": "d92859526e8f75f4c695871fc055907a698da855d105f162fb53ef5cd664cca3",
   "pnpm-lock.yaml": "ad9cbc8ad7f4d88fd0c5ad1e56efed12a9e133aa60b5a2ec543542942922fcc5",
-  "src-tauri/Cargo.toml": "141cc691154e738b8b2f47165b26e452816066c89a95df8e8007c2336d2faad0",
-  "package.json": "ef9faacb0b3858ebefa39c4f0f3d97b60b074883ff35b3d28ba6d4f3041b57ed",
+  "src-tauri/Cargo.toml": "ca058f809329bdec2f8335650bf796488de9f9e8c008551055ff997d2e8dcce6",
+  "package.json": "3aa19877ce2dbed759cdd2d107b46a86b451922ce2cb4ab88c41a2656fe7da1a",
   "scripts/license-inventory.mjs": "df5ccfe82da9a3f4c879d911d2fe1e8cad6380be39aba460ee844b845934a244"
 }
