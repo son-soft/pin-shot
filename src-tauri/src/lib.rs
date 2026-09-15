@@ -746,7 +746,7 @@ fn copy_history_to_clipboard(
         .unwrap_or(HWND::default());
 
     clipboard::copy_rgba_to_clipboard(hwnd, &record.pixels, record.item.width, record.item.height)
-        .map_err(|e| format!("复制失败: {e}"))?;
+        .map_err(|e| format!("复制失败：{}", e.message()))?;
 
     Ok(())
 }
@@ -1257,7 +1257,7 @@ fn complete_capture<R: Runtime>(
         }
         "copy" => {
             clipboard::copy_rgba_to_clipboard(hwnd, &pixels, width, height)
-                .map_err(|e| format!("复制失败: {e}"))?;
+                .map_err(|e| format!("复制失败：{}", e.message()))?;
             ActionResult {
                 action: action.clone(),
                 path: None,
@@ -1283,7 +1283,7 @@ fn complete_capture<R: Runtime>(
                 );
             } else {
                 clipboard::copy_text_to_clipboard(hwnd, &text)
-                    .map_err(|e| format!("复制文字失败: {e}"))?;
+                    .map_err(|e| format!("复制文字失败：{}", e.message()))?;
             }
             ActionResult {
                 action: action.clone(),
@@ -1590,7 +1590,7 @@ fn pin_action<R: Runtime>(
     match request.action.as_str() {
         "copy" => {
             clipboard::copy_rgba_to_clipboard(hwnd, &pin.pixels, pin.width, pin.height)
-                .map_err(|e| format!("复制失败: {e}"))?;
+                .map_err(|e| format!("复制失败：{}", e.message()))?;
         }
         "save" => {
             let config = state
@@ -1662,7 +1662,7 @@ fn pin_action<R: Runtime>(
                 );
             } else {
                 clipboard::copy_text_to_clipboard(hwnd, &text)
-                    .map_err(|e| format!("复制文字失败: {e}"))?;
+                    .map_err(|e| format!("复制文字失败：{}", e.message()))?;
             }
             return Ok(ActionResult {
                 action: request.action,
@@ -1774,11 +1774,13 @@ async fn ocr_capture(
 
 #[tauri::command(async)]
 fn copy_text_to_clipboard_cmd<R: Runtime>(
-    _app: AppHandle<R>,
+    window: tauri::WebviewWindow<R>,
     text: String,
 ) -> Result<(), String> {
-    let hwnd = HWND::default();
-    clipboard::copy_text_to_clipboard(hwnd, &text).map_err(|e| format!("复制文字失败: {e}"))?;
+    // EmptyClipboard with a NULL owner prevents SetClipboardData from writing.
+    // Use the invoking window, which remains alive until the copy completes.
+    let hwnd = window.hwnd().map_err(|e| format!("获取复制窗口失败: {e}"))?;
+    clipboard::copy_text_to_clipboard(hwnd, &text).map_err(|e| format!("复制文字失败：{}", e.message()))?;
     Ok(())
 }
 
@@ -1989,7 +1991,7 @@ fn finish_long_capture<R: Runtime>(
             }
             "copy" => {
                 clipboard::copy_rgba_to_clipboard(hwnd, &pixels, width, height)
-                    .map_err(|e| format!("复制失败: {e}"))?;
+                    .map_err(|e| format!("复制失败：{}", e.message()))?;
                 ActionResult {
                     action: action.clone(),
                     path: None,
@@ -2015,7 +2017,7 @@ fn finish_long_capture<R: Runtime>(
                     );
                 } else {
                     clipboard::copy_text_to_clipboard(hwnd, &text)
-                        .map_err(|e| format!("复制文字失败: {e}"))?;
+                        .map_err(|e| format!("复制文字失败：{}", e.message()))?;
                 }
                 ActionResult {
                     action: action.clone(),
@@ -2829,7 +2831,8 @@ fn export_recording_gif<R: Runtime>(
 
     let result = match action.as_str() {
         "copy" => {
-            let _ = clipboard::copy_file_to_clipboard(HWND::default(), &path);
+            clipboard::copy_file_to_clipboard(HWND::default(), &path)
+                .map_err(|e| format!("文件已保存，但复制失败：{}", e.message()))?;
             ActionResult {
                 action: action.clone(),
                 path: Some(path_str.clone()),
@@ -2922,7 +2925,8 @@ fn save_recording_video<R: Runtime>(
 
     let result = match action.as_str() {
         "copy" => {
-            let _ = clipboard::copy_file_to_clipboard(HWND::default(), &path);
+            clipboard::copy_file_to_clipboard(HWND::default(), &path)
+                .map_err(|e| format!("文件已保存，但复制失败：{}", e.message()))?;
             ActionResult {
                 action: action.clone(),
                 path: Some(path_str.clone()),

@@ -30,6 +30,7 @@ export function PinWindow({ pinId, onFinished }: { pinId: string; onFinished?: (
   const [isClickThrough, setIsClickThrough] = useState(false);
   const [ocrData, setOcrData] = useState<OcrResponse | null>(null);
   const [ocrLoading, setOcrLoading] = useState(false);
+  const [ocrError, setOcrError] = useState<string | null>(null);
   const [textSelectable, setTextSelectable] = useState(true);
   const [selectedText, setSelectedText] = useState('');
   const [selectionPos, setSelectionPos] = useState<{ x: number; y: number } | null>(null);
@@ -172,6 +173,7 @@ export function PinWindow({ pinId, onFinished }: { pinId: string; onFinished?: (
     if (!manifest || !buffer) return;
     let cancelled = false;
     setOcrLoading(true);
+    setOcrError(null);
     ocrPin(pinId)
       .then(res => {
         if (!cancelled) {
@@ -179,6 +181,7 @@ export function PinWindow({ pinId, onFinished }: { pinId: string; onFinished?: (
         }
       })
       .catch(err => {
+        if (!cancelled) setOcrError(err instanceof Error ? err.message : String(err));
         console.warn('OCR on pin failed:', err);
       })
       .finally(() => {
@@ -234,12 +237,16 @@ export function PinWindow({ pinId, onFinished }: { pinId: string; onFinished?: (
       setSelectedText('');
       setSelectionPos(null);
       window.getSelection()?.removeAllRanges();
-    } catch {
-      appToast.error('复制失败');
+    } catch (cause) {
+      appToast.error(cause instanceof Error ? cause.message : String(cause));
     }
   };
 
   const copyAllOcrText = async () => {
+    if (ocrError) {
+      appToast.error(`文字识别失败: ${ocrError}`);
+      return;
+    }
     if (!ocrData || !ocrData.fullText.trim()) {
       if (!ocrLoading) {
         appToast.info('贴图中未识别到任何文字');
@@ -248,8 +255,8 @@ export function PinWindow({ pinId, onFinished }: { pinId: string; onFinished?: (
     }
     try {
       await copyTextToClipboard(ocrData.fullText);
-    } catch {
-      appToast.error('复制失败');
+    } catch (cause) {
+      appToast.error(cause instanceof Error ? cause.message : String(cause));
     }
   };
 
@@ -399,7 +406,7 @@ export function PinWindow({ pinId, onFinished }: { pinId: string; onFinished?: (
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [manifest, isClickThrough, selectedText, ocrData, ocrLoading]);
+  }, [manifest, isClickThrough, selectedText, ocrData, ocrLoading, ocrError]);
 
   if (error) {
     return (

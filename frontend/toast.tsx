@@ -151,7 +151,7 @@ export function ToastWindow() {
           title={isSave && data.path ? `点击在资源管理器中定位：${data.path}` : undefined}
         >
           <div className="toast-title-row">
-            <span className="toast-title">
+            <span className="toast-title" title={data.message || undefined}>
               {data.message || (isSave ? '截图已保存' : '操作成功')}
             </span>
           </div>
@@ -160,7 +160,7 @@ export function ToastWindow() {
               {data.path}
             </div>
           ) : data.subtext ? (
-            <div className="toast-subtext">{data.subtext}</div>
+            <div className="toast-subtext" title={data.subtext}>{data.subtext}</div>
           ) : null}
         </div>
         <div className="toast-actions">

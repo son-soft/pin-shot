@@ -2235,8 +2235,8 @@ export function Overlay({ sessionId, onFinished }: { sessionId: string; onFinish
       if (finish) {
         await finishOcrCapture();
       }
-    } catch {
-      appToast.error('复制失败');
+    } catch (cause) {
+      appToast.error(describeError(cause).message);
     }
   };
 
@@ -2250,8 +2250,8 @@ export function Overlay({ sessionId, onFinished }: { sessionId: string; onFinish
       if (finish) {
         await finishOcrCapture();
       }
-    } catch {
-      appToast.error('复制失败');
+    } catch (cause) {
+      appToast.error(describeError(cause).message);
     }
   };
 

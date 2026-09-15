@@ -1,6 +1,17 @@
 import { invoke } from '@tauri-apps/api/core';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 
+async function reportCommandError(source: string, context: string, cause: unknown): Promise<never> {
+  // Tauri rejects Rust Result::Err(String) as a string, not an Error instance.
+  const error = cause instanceof Error ? cause : new Error(String(cause));
+  try {
+    await writeDiagnosticLog('error', source, `${context}; error=${error.message}`, error.stack);
+  } catch {
+    // Preserve the original failure even if diagnostics are unavailable.
+  }
+  throw error;
+}
+
 export type ThemeMode = 'system' | 'light' | 'dark';
 
 export interface HotkeyBinding {
@@ -159,7 +170,8 @@ export function restoreHistoryAsPin(id?: string) {
 }
 
 export function copyHistoryToClipboard(id?: string) {
-  return invoke<void>('copy_history_to_clipboard', { id: id ?? null });
+  return invoke<void>('copy_history_to_clipboard', { id: id ?? null })
+    .catch(cause => reportCommandError('clipboard.history', `id=${id ?? 'latest'}`, cause));
 }
 
 export function saveHistoryToFile(id?: string) {
@@ -242,11 +254,13 @@ export function pinAction(
   action: 'copy' | 'save' | 'toggleTopmost' | 'close' | 'toggleClickThrough' | 'cancelClickThrough' | 'setGhostOpacity' | 'copyText',
   opacity?: number,
 ) {
-  return invoke<ActionResult>('pin_action', { request: { pinId, action, opacity } });
+  return invoke<ActionResult>('pin_action', { request: { pinId, action, opacity } })
+    .catch(cause => reportCommandError('pin.action', `pin=${pinId}; action=${action}`, cause));
 }
 
 export function ocrPin(pinId: string): Promise<OcrResponse> {
-  return invoke<OcrResponse>('ocr_pin', { pinId });
+  return invoke<OcrResponse>('ocr_pin', { pinId })
+    .catch(cause => reportCommandError('ocr.pin', `pin=${pinId}`, cause));
 }
 
 export function ocrCapture(
@@ -261,11 +275,12 @@ export function ocrCapture(
       width: Math.round(rect.width),
       height: Math.round(rect.height),
     },
-  });
+  }).catch(cause => reportCommandError('ocr.capture', `session=${sessionId}; rect=${JSON.stringify(rect)}`, cause));
 }
 
 export function copyTextToClipboard(text: string): Promise<void> {
-  return invoke<void>('copy_text_to_clipboard_cmd', { text });
+  return invoke<void>('copy_text_to_clipboard_cmd', { text })
+    .catch(cause => reportCommandError('clipboard.text', `chars=${text.length}`, cause));
 }
 
 export function showInFolder(path: string) {
@@ -295,8 +310,16 @@ export function showToast(options: ToastOptions) {
 export const appToast = {
   success: (message: string, subtext?: string, duration = 2800) =>
     showToast({ kind: 'success', message, subtext, duration }),
-  error: (message: string, subtext?: string, duration = 4500) =>
-    showToast({ kind: 'error', message, subtext, duration }),
+  error: (message: string, subtext?: string, duration = 4500) => {
+    // Native errors may carry a short title followed by recovery instructions.
+    const [title, ...details] = message.split('\n');
+    return showToast({
+      kind: 'error',
+      message: title,
+      subtext: subtext ?? (details.join(' ').trim() || undefined),
+      duration: details.length ? Math.max(duration, 8000) : duration,
+    });
+  },
   info: (message: string, subtext?: string, duration = 2500) =>
     showToast({ kind: 'info', message, subtext, duration }),
   copy: (message = '已复制到剪贴板', subtext = '已存入系统剪贴板，可直接粘贴 (Ctrl+V)', duration = 2800) =>

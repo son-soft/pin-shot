@@ -2,13 +2,17 @@ use std::mem::size_of;
 use std::sync::{Mutex, OnceLock};
 use std::time::Duration;
 
-use windows::Win32::Foundation::{GlobalFree, HANDLE, HGLOBAL, HWND};
+use windows::Win32::Foundation::{CloseHandle, GlobalFree, HANDLE, HGLOBAL, HWND};
 use windows::Win32::Graphics::Gdi::{BITMAPINFOHEADER, BI_RGB};
 use windows::Win32::System::DataExchange::{
-    CloseClipboard, EmptyClipboard, OpenClipboard, SetClipboardData,
+    CloseClipboard, EmptyClipboard, GetOpenClipboardWindow, OpenClipboard, SetClipboardData,
 };
 use windows::Win32::System::Memory::{GlobalAlloc, GlobalLock, GlobalUnlock, GMEM_MOVEABLE};
 use windows::Win32::System::Ole::{CF_DIB, CF_UNICODETEXT};
+use windows::Win32::System::Threading::{
+    OpenProcess, QueryFullProcessImageNameW, PROCESS_NAME_WIN32, PROCESS_QUERY_LIMITED_INFORMATION,
+};
+use windows::Win32::UI::WindowsAndMessaging::GetWindowThreadProcessId;
 
 use crate::diagnostics;
 
@@ -40,6 +44,69 @@ fn owner_details(hwnd: HWND) -> String {
     }
 }
 
+struct ClipboardHolder {
+    hwnd: HWND,
+    pid: u32,
+    process_name: String,
+}
+
+impl ClipboardHolder {
+    fn details(&self) -> String {
+        format!(
+            "heldByWindow={}; heldByPid={}; heldByProcess={}",
+            owner_details(self.hwnd), self.pid, self.process_name,
+        )
+    }
+
+    fn user_message(&self) -> String {
+        if self.pid != 0 && self.pid != std::process::id() {
+            let title = if self.process_name != "unknown" {
+                format!("剪贴板被 {} 占用", self.process_name)
+            } else {
+                "剪贴板被其他程序占用".to_string()
+            };
+            format!("{title}\n请关闭该程序的剪贴板同步，或退出该程序后重试")
+        } else {
+            // A NULL opener or a race can hide the holder; do not accuse an
+            // application that we could not actually identify.
+            "剪贴板暂时无法访问\n请稍后重试；若仍失败，请暂停远程软件的剪贴板同步".to_string()
+        }
+    }
+}
+
+fn clipboard_holder() -> ClipboardHolder {
+    unsafe {
+        // The window holding the clipboard open can differ from the owner of
+        // its contents (for example, a remote clipboard synchronization app).
+        let hwnd = GetOpenClipboardWindow().unwrap_or_default();
+        let mut pid = 0;
+        if hwnd != HWND::default() {
+            GetWindowThreadProcessId(hwnd, Some(&mut pid));
+        }
+        let mut process_name = "unknown".to_string();
+        if pid != 0 {
+            if let Ok(process) = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pid) {
+                let mut buffer = vec![0u16; 32768];
+                let mut length = buffer.len() as u32;
+                let result = QueryFullProcessImageNameW(
+                    process,
+                    PROCESS_NAME_WIN32,
+                    windows::core::PWSTR(buffer.as_mut_ptr()),
+                    &mut length,
+                );
+                let _ = CloseHandle(process);
+                if result.is_ok() {
+                    let path = String::from_utf16_lossy(&buffer[..length as usize]);
+                    if let Some(name) = std::path::Path::new(&path).file_name() {
+                        process_name = name.to_string_lossy().into_owned();
+                    }
+                }
+            }
+        }
+        ClipboardHolder { hwnd, pid, process_name }
+    }
+}
+
 struct ClipboardGuard {
     opened: bool,
 }
@@ -53,6 +120,7 @@ impl ClipboardGuard {
         };
         let owner_text = owner_details(hwnd);
         let mut last_error = None;
+        let mut last_holder = None;
 
         for attempt in 1..=OPEN_CLIPBOARD_ATTEMPTS {
             match OpenClipboard(owner) {
@@ -71,14 +139,17 @@ impl ClipboardGuard {
                 }
                 Err(error) => {
                     if attempt == 1 || attempt == OPEN_CLIPBOARD_ATTEMPTS {
+                        let holder = clipboard_holder();
                         diagnostics::log(
                             "WARN",
                             "clipboard",
                             format!(
-                                "{operation}: OpenClipboard attempt {attempt}/{OPEN_CLIPBOARD_ATTEMPTS} failed; owner={owner_text}; error={}",
+                                "{operation}: OpenClipboard attempt {attempt}/{OPEN_CLIPBOARD_ATTEMPTS} failed; owner={owner_text}; error={}; {}",
                                 error_details(&error),
+                                holder.details(),
                             ),
                         );
+                        last_holder = Some(holder);
                     }
                     last_error = Some(error);
                     if attempt < OPEN_CLIPBOARD_ATTEMPTS {
@@ -97,7 +168,8 @@ impl ClipboardGuard {
                 error_details(&error),
             ),
         );
-        Err(error)
+        let holder = last_holder.unwrap_or_else(clipboard_holder);
+        Err(windows::core::Error::new(error.code(), holder.user_message()))
     }
 
     unsafe fn close(&mut self) -> windows::core::Result<()> {
