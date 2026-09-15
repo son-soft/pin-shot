@@ -467,6 +467,7 @@ export function Overlay({ sessionId, onFinished }: { sessionId: string; onFinish
   const [longCaptureIsBottom, setLongCaptureIsBottom] = useState(false);
   const [scrollStepLoading, setScrollStepLoading] = useState(false);
   const scrollStepLoadingRef = useRef(false);
+  const longCaptureExportInFlightRef = useRef(false);
 
   // Recording states
   const [isRecordingPrep, setIsRecordingPrep] = useState(false);
@@ -494,6 +495,7 @@ export function Overlay({ sessionId, onFinished }: { sessionId: string; onFinish
   const recordingActionRef = useRef(false);
   const exportActionRef = useRef(false);
   const exportCancelRef = useRef(false);
+  const selectionExportInFlightRef = useRef(false);
   const capacityToastRef = useRef(false);
   const recordingPollErrorRef = useRef(false);
 
@@ -1882,8 +1884,20 @@ export function Overlay({ sessionId, onFinished }: { sessionId: string; onFinish
   };
 
   const exportSelection = async (action: 'save' | 'copy' | 'pin' | 'ocr') => {
-    if (!selection || !baseRef.current || busy || ocrInteractionLocked) return;
+    // `busy` is React state and can still be stale when a key repeat, a
+    // double-click, or a toolbar click arrives before the next render. Keep a
+    // synchronous guard as well so one capture session cannot submit two
+    // completion requests. The second request would otherwise race the first
+    // one and be reported as "截图会话已失效" after the first clears it.
+    if (
+      !selection ||
+      !baseRef.current ||
+      busy ||
+      ocrInteractionLocked ||
+      selectionExportInFlightRef.current
+    ) return;
     const rect = cropRect(selection, manifest!);
+    selectionExportInFlightRef.current = true;
     setBusy(action);
     setStatus(action === 'pin' ? '正在创建钉图…' : action === 'ocr' ? '正在识别文字…' : '正在处理…');
     try {
@@ -1949,7 +1963,22 @@ export function Overlay({ sessionId, onFinished }: { sessionId: string; onFinish
         finalCanvas.width,
         finalCanvas.height,
       ).data;
+      logDiagnostic(
+        'info',
+        'capture.export',
+        `requested; session=${sessionId}; action=${action}; rect=${[
+          finalRect.x,
+          finalRect.y,
+          finalRect.width,
+          finalRect.height,
+        ].join('x')}; bytes=${pixels.byteLength}`,
+      );
       const result = await completeCapture(sessionId, action, finalRect, pixels);
+      logDiagnostic(
+        'info',
+        'capture.export',
+        `completed; session=${sessionId}; action=${action}`,
+      );
       setStatus(
         action === 'save'
           ? `已保存：${result.path ?? ''}`
@@ -1961,9 +1990,18 @@ export function Overlay({ sessionId, onFinished }: { sessionId: string; onFinish
         onFinished();
       }
     } catch (cause) {
+      const detail = describeError(cause);
+      logDiagnostic(
+        'error',
+        'capture.export',
+        `failed; session=${sessionId}; action=${action}; ${detail.message}`,
+        detail.stack,
+      );
       setBusy(null);
       setStatus('操作失败');
-      appToast.error(cause instanceof Error ? cause.message : '操作失败');
+      appToast.error(detail.message || '操作失败');
+    } finally {
+      selectionExportInFlightRef.current = false;
     }
   };
 
@@ -2273,6 +2311,8 @@ export function Overlay({ sessionId, onFinished }: { sessionId: string; onFinish
   };
 
   const completeLongCaptureFlow = async (action: 'save' | 'copy') => {
+    if (!isLongCapturing || longCaptureExportInFlightRef.current) return;
+    longCaptureExportInFlightRef.current = true;
     setBusy('正在导出长截图...');
     // Await any in-flight scroll/capture step to cleanly finish before exporting
     let waitCount = 0;
@@ -2318,6 +2358,7 @@ export function Overlay({ sessionId, onFinished }: { sessionId: string; onFinish
       appToast.error('导出长截图失败', String(err));
     } finally {
       scrollStepLoadingRef.current = false;
+      longCaptureExportInFlightRef.current = false;
       setBusy(null);
     }
   };

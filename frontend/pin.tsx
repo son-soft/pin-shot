@@ -34,6 +34,7 @@ export function PinWindow({ pinId, onFinished }: { pinId: string; onFinished?: (
   const [selectedText, setSelectedText] = useState('');
   const [selectionPos, setSelectionPos] = useState<{ x: number; y: number } | null>(null);
   const ocrTextLayerRef = useRef<HTMLDivElement>(null);
+  const imageActionInFlightRef = useRef(false);
 
   useEffect(() => {
     let disposed = false;
@@ -276,6 +277,14 @@ export function PinWindow({ pinId, onFinished }: { pinId: string; onFinished?: (
   };
 
   const action = async (value: 'copy' | 'save' | 'toggleTopmost' | 'close' | 'toggleClickThrough' | 'cancelClickThrough') => {
+    // Keyboard repeat and double-clicks can arrive before React has rendered
+    // any disabled/loading state. Avoid submitting two image actions at once;
+    // the native clipboard transaction is intentionally serialized too.
+    const isImageAction = value === 'copy' || value === 'save';
+    if (isImageAction) {
+      if (imageActionInFlightRef.current) return;
+      imageActionInFlightRef.current = true;
+    }
     try {
       if (value === 'close') {
         await pinAction(pinId, value);
@@ -305,6 +314,8 @@ export function PinWindow({ pinId, onFinished }: { pinId: string; onFinished?: (
       }
     } catch (cause) {
       appToast.error(cause instanceof Error ? cause.message : '操作失败');
+    } finally {
+      if (isImageAction) imageActionInFlightRef.current = false;
     }
   };
 
